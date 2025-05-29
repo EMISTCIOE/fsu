@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2" onClick={closeMenu}>
             <img
-              src="https://tcioe.edu.np/img/logo/logo.png"
+              src="https://tcioe.edu.np/_next/static/media/logo.e88d9bff.svg"
               alt="FSU Logo"
               className="h-12 w-auto"
             />
