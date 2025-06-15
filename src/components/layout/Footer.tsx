@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-bold mb-4">Free Student Union</h3>
             <div className="flex items-center mb-4">
               <img
-                src="https://tcioe.edu.np/_next/static/media/logo.e88d9bff.svg"
+                src="fsu_logo.jpg"
                 alt="FSU Logo"
                 className="h-12 w-auto mr-3 bg-white rounded p-1"
               />

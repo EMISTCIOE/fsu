@@ -24,7 +24,7 @@ const members: Member[] = [
         name: "Diwash Neupane",
         position: "Vice President",
        
-        image: "https://images.pexels.com/photos/3796217/pexels-photo-3796217.jpeg",
+        image: "/members/Diwash.jpg",
         
     },
     {
@@ -32,7 +32,7 @@ const members: Member[] = [
         name: "Jesis Upadhayaya",
         position: "Secretary",
        
-        image: "https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg",
+        image:  "/members/Jesis.jpg",
        
     },
     {
@@ -40,7 +40,7 @@ const members: Member[] = [
         name: "Siddhartha Nepal",
         position: "Vice-Secretary",
        
-        image: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg",
+        image:  "/members/Siddhartha.jpg",
        
     },
     {
@@ -48,7 +48,7 @@ const members: Member[] = [
         name: "Hrishikesh Prajapati",
         position: "Treasurer",
        
-        image: "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg",
+        image: "/members/Hrishi.jpg",
        
     },
     {
@@ -56,7 +56,7 @@ const members: Member[] = [
         name: "Utsav Adhikari",
         position: "General Member",
        
-        image: "https://images.pexels.com/photos/3796216/pexels-photo-3796216.jpeg",
+        image:  "/members/Utsav.jpg",
        
     },
     {
@@ -64,7 +64,7 @@ const members: Member[] = [
         name: "Riya Bhattarai",
         position: "General Member",
        
-        image: "https://images.pexels.com/photos/2379006/pexels-photo-2379006.jpeg",
+        image:  "/members/Riya.jpg",
        
     },
     {
@@ -72,7 +72,7 @@ const members: Member[] = [
         name: "Bibek Pandey",
         position: "General Member",
       
-        image: "https://images.pexels.com/photos/3785424/pexels-photo-3785424.jpeg",
+        image:  "/members/Bibek.jpg",
         
     },
     {
@@ -80,7 +80,7 @@ const members: Member[] = [
         name: "Avinash Joshi",
         position: "General Member",
       
-        image: "https://images.pexels.com/photos/2379007/pexels-photo-2379007.jpeg",
+        image:  "/members/Avinash.jpg",
        
     },
     {
@@ -88,7 +88,7 @@ const members: Member[] = [
         name: "Usha Bist",
         position: "General Member",
       
-        image: "https://images.pexels.com/photos/3785425/pexels-photo-3785425.jpeg",
+        image: "/members/Usha.jpg",
         
     },
     {
@@ -96,7 +96,7 @@ const members: Member[] = [
         name: "Sara Neupane",
         position: "General Member",
       
-        image: "https://images.pexels.com/photos/2379008/pexels-photo-2379008.jpeg",
+        image:  "/members/Sara.jpg",
        
     },
     {
@@ -104,7 +104,7 @@ const members: Member[] = [
         name: "Prasant Kumar Jha",
         position: "General Member",
         
-        image: "https://images.pexels.com/photos/3785426/pexels-photo-3785426.jpeg",
+        image:  "/members/Prasant.jpg",
        
     },
     {
@@ -112,7 +112,7 @@ const members: Member[] = [
         name: "Subash Lamichhane",
         position: "General Member",
       
-        image: "https://images.pexels.com/photos/2379009/pexels-photo-2379009.jpeg",
+        image:  "/members/Subash.jpg",
         
     },
     {
@@ -120,7 +120,7 @@ const members: Member[] = [
         name: "Swikar Khadka",
         position: "General Member",
       
-        image: "https://images.pexels.com/photos/3785427/pexels-photo-3785427.jpeg",
+        image:  "/members/Swikar.jpg",
         
     },
     {
@@ -128,7 +128,7 @@ const members: Member[] = [
         name: "Ishan K.C",
         position: "General Member",
        
-        image: "https://images.pexels.com/photos/2379010/pexels-photo-2379010.jpeg",
+        image:  "/members/Ishan.jpg",
        
     },
     {
@@ -136,7 +136,7 @@ const members: Member[] = [
         name: "Gyandeep Mahato",
         position: "General Member",
        
-        image: "https://images.pexels.com/photos/3785428/pexels-photo-3785428.jpeg",
+        image:  "/members/Gyandeep.jpg",
        
     },
     {
@@ -144,7 +144,7 @@ const members: Member[] = [
         name: "Mukesh Giri",
         position: "General Member",
         
-        image: "https://images.pexels.com/photos/2379011/pexels-photo-2379011.jpeg",
+        image:  "/members/Mukesh.jpg",
         
     },
     {
@@ -152,7 +152,7 @@ const members: Member[] = [
         name: "Lalit Dani",
         position: "General Member",
        
-        image: "https://images.pexels.com/photos/3785429/pexels-photo-3785429.jpeg",
+        image: "/members/Lalit.jpg",
        
     },
     {
@@ -160,7 +160,7 @@ const members: Member[] = [
         name: "Sheela Sharma",
         position: "General Member",
         
-        image: "https://images.pexels.com/photos/2379012/pexels-photo-2379012.jpeg",
+        image: "/members/Sheela.jpg",
         
     },
     

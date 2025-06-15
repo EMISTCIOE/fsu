@@ -1,6 +1,6 @@
 import React from 'react';
 import { Users, Award, Heart, Book } from 'lucide-react';
-import TeamSection from '../components/home/TeamSection';
+//import TeamSection from '../components/home/TeamSection';
 
 const AboutPage: React.FC = () => {
   return (
