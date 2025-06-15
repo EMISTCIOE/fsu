@@ -25,7 +25,7 @@ const members: Member[] = [
     },
     {
         id: 2,
-        name: "Priya Patel",
+        name: "Diwash Neupane",
         position: "Vice President",
         department: "Civil Engineering",
         image: "https://images.pexels.com/photos/3796217/pexels-photo-3796217.jpeg",
