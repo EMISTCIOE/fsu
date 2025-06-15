@@ -118,13 +118,7 @@ const AboutPage: React.FC = () => {
         </div>
       </section>
       
-      {/* Team Section */}
-      <section className="py-16 bg-white">
-        <div className="container-custom">
-          <h2 className="section-title text-center mb-12">Meet Our Team</h2>
-          <TeamSection />
-        </div>
-      </section>
+      
     </div>
   );
 };

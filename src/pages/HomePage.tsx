@@ -34,7 +34,7 @@ const HomePage: React.FC = () => {
             {/* Image */}
             <div className="md:w-1/3">
               <img
-                src="president.jpg"
+                src="/members/president.jpg"
                 alt="President of FSU Thapathali"
                 className="rounded-lg shadow-lg w-full h-auto object-cover"
               />
