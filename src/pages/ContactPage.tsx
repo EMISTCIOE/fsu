@@ -90,16 +90,17 @@ const ContactPage: React.FC = () => {
             <div className="card overflow-hidden">
               {/* Embedded Map */}
               <div className="h-72">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.543577992336!2d85.3142563!3d27.694073!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19b19295555f%3A0xabfe5f4b310f97de!2sInstitute%20of%20Engineering%20(IOE)%2C%20Thapathali%20Campus!5e0!3m2!1sen!2snp!4v1667887587590!5m2!1sen!2snp" 
-                  width="100%" 
-                  height="100%" 
-                  style={{ border: 0 }} 
-                  allowFullScreen 
-                  loading="lazy" 
+                <iframe
+                  src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4448.140225565396!2d85.3162511761874!3d27.69403942607703!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19ae08c068d9%3A0x475bed1f66d060c!2sIOE%2C%20Thapathali%20Campus!5e0!3m2!1sen!2snp!4v1750094268273!5m2!1sen!2snp'
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   title="Campus Map"
-                ></iframe>
+                />
+
               </div>
               
               {/* Quick Contact Form */}
