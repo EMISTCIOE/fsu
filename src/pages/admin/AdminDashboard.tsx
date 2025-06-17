@@ -136,7 +136,6 @@ const AdminDashboard: React.FC = () => {
                     <p className="text-sm text-gray-600 truncate">{notice.title}</p>
                     <div className="flex justify-between mt-2">
                       <span className="text-xs text-gray-500">{notice.date}</span>
-                      <button className="text-primary text-xs hover:underline">Edit</button>
                     </div>
                   </div>
                 ))}
