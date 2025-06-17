@@ -7,11 +7,10 @@ import { noticeService, type NoticeRequest, type NoticeResponse } from "../servi
 export interface Notice {
   id: string
   title: string
-  content: string
   category: "academic" | "event" | "general" | "important"
   date: string
   author: string
-  attachments?: string[]
+  attachments?: string | null
   pinned?: boolean
 }
 
@@ -19,7 +18,7 @@ interface NoticeContextType {
   notices: Notice[]
   loading: boolean
   error: string | null
-  addNotice: (notice: Omit<Notice, "id" | "date">) => Promise<void>
+  addNotice: (notice: Omit<Notice, "id" | "date">, pdfFile: File) => Promise<void>
   updateNotice: (id: string, notice: Partial<Notice>) => Promise<void>
   deleteNotice: (id: string) => Promise<void>
   getNoticeById: (id: string) => Notice | undefined
@@ -45,7 +44,6 @@ interface NoticeProviderProps {
 const convertNoticeFromAPI = (apiNotice: NoticeResponse): Notice => ({
   id: apiNotice._id,
   title: apiNotice.title,
-  content: apiNotice.content,
   category: apiNotice.category,
   date: apiNotice.createdAt.split("T")[0], // Convert ISO date to YYYY-MM-DD
   author: apiNotice.author,
@@ -56,11 +54,9 @@ const convertNoticeFromAPI = (apiNotice: NoticeResponse): Notice => ({
 // Helper function to convert frontend format to backend request
 const convertNoticeToAPI = (notice: Omit<Notice, "id" | "date">): NoticeRequest => ({
   title: notice.title,
-  content: notice.content,
   category: notice.category,
   author: notice.author,
   pinned: notice.pinned,
-  attachments: notice.attachments,
 })
 
 export const NoticeProvider: React.FC<NoticeProviderProps> = ({ children }) => {
@@ -106,31 +102,28 @@ export const NoticeProvider: React.FC<NoticeProviderProps> = ({ children }) => {
       {
         id: "1",
         title: "End Semester Examination Schedule",
-        content:
-          "The end semester examinations for all departments will begin from 15th February 2025. Students are advised to check the detailed schedule and prepare accordingly.",
         category: "academic",
         date: "2025-01-15",
         author: "Examination Section",
         pinned: true,
+        attachments: "/notices/exam_schedule.pdf",
       },
       {
         id: "2",
         title: "Annual Technical Festival: TechFest 2025",
-        content:
-          'We are excited to announce our annual technical festival "TechFest 2025" which will be held from March 5-7, 2025. The event will feature various competitions, workshops, and guest lectures from industry experts.',
         category: "event",
         date: "2025-01-20",
         author: "Event Coordinator",
+        attachments: "/notices/techfest_2025.pdf",
       },
       {
         id: "3",
         title: "Scholarship Application Deadline",
-        content:
-          "Applications for the Merit Scholarship program for the academic year 2025-26 are now open. Eligible students can apply through the online portal before February 28, 2025.",
         category: "important",
         date: "2025-01-25",
         author: "Scholarship Committee",
-        attachments: ["scholarship_form.pdf"],
+        pinned: false,
+        attachments: "/notices/scholarship_info.pdf",
       },
     ]
 
@@ -149,17 +142,24 @@ export const NoticeProvider: React.FC<NoticeProviderProps> = ({ children }) => {
     }
   }, [notices])
 
-  const addNotice = async (notice: Omit<Notice, "id" | "date">) => {
+  const addNotice = async (notice: Omit<Notice, "id" | "date">, pdfFile: File) => {
     try {
       setLoading(true)
       setError(null)
 
+      // Step 1: Create the notice without attachment
       const apiNotice = convertNoticeToAPI(notice)
-      const response = await noticeService.createNotice(apiNotice)
-      const newNotice = convertNoticeFromAPI(response.notice)
+      const createResponse = await noticeService.createNotice(apiNotice)
+      const createdNotice = convertNoticeFromAPI(createResponse.notice)
 
-      setNotices((prev) => [newNotice, ...prev])
-      console.log("Notice added successfully:", newNotice)
+      console.log("Notice created, now uploading PDF...")
+
+      // Step 2: Upload the PDF file
+      const uploadResponse = await noticeService.uploadNoticePdf(createdNotice.id, pdfFile)
+      const finalNotice = convertNoticeFromAPI(uploadResponse.notice)
+
+      setNotices((prev) => [finalNotice, ...prev])
+      console.log("Notice added successfully with PDF:", finalNotice)
     } catch (error) {
       console.error("Failed to add notice:", error)
       setError(error instanceof Error ? error.message : "Failed to add notice")
@@ -175,7 +175,7 @@ export const NoticeProvider: React.FC<NoticeProviderProps> = ({ children }) => {
       setError(null)
 
       // Remove id and date from the update fields as they shouldn't be sent to API
-      const { id: _, date: __, ...apiFields } = updatedFields
+      const { id: _, date: __, attachments: ___, ...apiFields } = updatedFields
 
       const response = await noticeService.updateNotice(id, apiFields)
       const updatedNotice = convertNoticeFromAPI(response.notice)

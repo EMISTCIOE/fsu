@@ -2,13 +2,12 @@
 
 import type React from "react"
 import { useState } from "react"
-import { PlusCircle, Edit, Trash2, FileText, PinIcon, RefreshCw, AlertCircle } from "lucide-react"
+import { PlusCircle, Edit, Trash2, FileText, PinIcon, RefreshCw, AlertCircle, Upload } from "lucide-react"
 import type { Notice } from "../../contexts/NoticeContext"
 import { useNotices } from "../../hooks/useNotices"
 
 interface NoticeFormData {
   title: string
-  content: string
   category: "academic" | "event" | "general" | "important"
   author: string
   pinned: boolean
@@ -16,7 +15,6 @@ interface NoticeFormData {
 
 const initialFormData: NoticeFormData = {
   title: "",
-  content: "",
   category: "general",
   author: "",
   pinned: false,
@@ -26,10 +24,11 @@ const AdminNotices: React.FC = () => {
   const { notices, loading, error, addNotice, updateNotice, deleteNotice, refreshNotices } = useNotices()
 
   const [formData, setFormData] = useState<NoticeFormData>(initialFormData)
+  const [pdfFile, setPdfFile] = useState<File | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [currentId, setCurrentId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [errors, setErrors] = useState<Partial<NoticeFormData>>({})
+  const [errors, setErrors] = useState<Partial<NoticeFormData & { pdf: string }>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -47,13 +46,32 @@ const AdminNotices: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: checked }))
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.type !== "application/pdf") {
+        setErrors((prev) => ({ ...prev, pdf: "Please select a PDF file" }))
+        setPdfFile(null)
+        return
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        // 10MB limit
+        setErrors((prev) => ({ ...prev, pdf: "File size must be less than 10MB" }))
+        setPdfFile(null)
+        return
+      }
+      setPdfFile(file)
+      setErrors((prev) => ({ ...prev, pdf: undefined }))
+    }
+  }
+
   const validateForm = (): boolean => {
-    const newErrors: Partial<NoticeFormData> = {}
+    const newErrors: Partial<NoticeFormData & { pdf: string }> = {}
 
     if (!formData.title.trim()) newErrors.title = "Title is required"
-    if (!formData.content.trim()) newErrors.content = "Content is required"
     if (!formData.category) newErrors.category = "Category is required"
     if (!formData.author.trim()) newErrors.author = "Author is required"
+    if (!isEditing && !pdfFile) newErrors.pdf = "PDF file is required"
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -68,9 +86,13 @@ const AdminNotices: React.FC = () => {
 
     try {
       if (isEditing && currentId) {
+        // For editing, we only update the notice metadata (no PDF upload for now)
         await updateNotice(currentId, formData)
       } else {
-        await addNotice(formData)
+        // For creating, we need both notice data and PDF file
+        if (pdfFile) {
+          await addNotice(formData, pdfFile)
+        }
       }
 
       resetForm()
@@ -85,7 +107,6 @@ const AdminNotices: React.FC = () => {
   const handleEdit = (notice: Notice) => {
     setFormData({
       title: notice.title,
-      content: notice.content,
       category: notice.category,
       author: notice.author,
       pinned: notice.pinned || false,
@@ -93,6 +114,7 @@ const AdminNotices: React.FC = () => {
     setCurrentId(notice.id)
     setIsEditing(true)
     setShowForm(true)
+    setPdfFile(null) // Reset PDF file for editing
 
     // Scroll to form
     window.scrollTo({ top: 0, behavior: "smooth" })
@@ -111,6 +133,7 @@ const AdminNotices: React.FC = () => {
 
   const resetForm = () => {
     setFormData(initialFormData)
+    setPdfFile(null)
     setIsEditing(false)
     setCurrentId(null)
     setShowForm(false)
@@ -184,22 +207,6 @@ const AdminNotices: React.FC = () => {
                 {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
               </div>
 
-              <div>
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-                  Content *
-                </label>
-                <textarea
-                  id="content"
-                  name="content"
-                  rows={5}
-                  value={formData.content}
-                  onChange={handleChange}
-                  className={`input-field resize-none ${errors.content ? "border-red-500" : ""}`}
-                  disabled={isSubmitting}
-                ></textarea>
-                {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
@@ -237,6 +244,44 @@ const AdminNotices: React.FC = () => {
                   {errors.author && <p className="mt-1 text-sm text-red-600">{errors.author}</p>}
                 </div>
               </div>
+
+              {!isEditing && (
+                <div>
+                  <label htmlFor="pdf" className="block text-sm font-medium text-gray-700 mb-1">
+                    Notice PDF *
+                  </label>
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                    <div className="space-y-1 text-center">
+                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                      <div className="flex text-sm text-gray-600">
+                        <label
+                          htmlFor="pdf"
+                          className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-light focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
+                        >
+                          <span>Upload a PDF file</span>
+                          <input
+                            id="pdf"
+                            name="pdf"
+                            type="file"
+                            accept=".pdf"
+                            className="sr-only"
+                            onChange={handleFileChange}
+                            disabled={isSubmitting}
+                          />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs text-gray-500">PDF up to 10MB</p>
+                      {pdfFile && (
+                        <p className="text-sm text-green-600 mt-2">
+                          Selected: {pdfFile.name} ({(pdfFile.size / 1024 / 1024).toFixed(2)} MB)
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {errors.pdf && <p className="mt-1 text-sm text-red-600">{errors.pdf}</p>}
+                </div>
+              )}
 
               <div className="flex items-center">
                 <input
@@ -355,12 +400,12 @@ const AdminNotices: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{notice.date}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{notice.author}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {notice.attachments && notice.attachments.length > 0 ? (
+                          {notice.attachments ? (
                             <span className="inline-flex items-center text-xs text-blue-600">
-                              <FileText size={14} className="mr-1" /> With attachment
+                              <FileText size={14} className="mr-1" /> PDF attached
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-500">No attachment</span>
+                            <span className="text-xs text-red-500">No PDF</span>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">

@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { NavLink, Link, useLocation } from "react-router-dom"
-import { Menu, X, LogOut } from "lucide-react"
+import { Menu, X, LogOut, ChevronDown, ChevronRight } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
 
 interface HeaderProps {
@@ -12,21 +12,46 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isClubsDropdownOpen, setIsClubsDropdownOpen] = useState(false)
+  const [isMobileClubsOpen, setIsMobileClubsOpen] = useState(false)
   const location = useLocation()
   const { isAuthenticated, logout } = useAuth()
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
+    // Reset mobile clubs dropdown when main menu closes
+    if (isMenuOpen) {
+      setIsMobileClubsOpen(false)
+    }
+  }
+
+  const toggleClubsDropdown = () => {
+    setIsClubsDropdownOpen(!isClubsDropdownOpen)
+  }
+
+  const toggleMobileClubs = () => {
+    setIsMobileClubsOpen(!isMobileClubsOpen)
   }
 
   const closeMenu = () => {
     setIsMenuOpen(false)
+    setIsMobileClubsOpen(false)
   }
 
   const handleLogout = async () => {
     await logout()
     closeMenu()
   }
+
+  const studentClubs = [
+    { name: "AMESIN", url: "#" },
+    { name: "ASIS", url: "#" },
+    { name: "CESS", url: "#" },
+    { name: "ECAST", url: "#" },
+    { name: "RAC", url: "#" },
+    { name: "SOIES", url: "#" },
+    { name: "TENSOR", url: "#" },
+  ]
 
   const isActive = (path: string) => {
     return location.pathname === path
@@ -67,6 +92,33 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
             <NavLink to="/gallery" className={`nav-link ${isActive("/gallery") ? "nav-link-active" : ""}`}>
               Gallery
             </NavLink>
+            <div className="relative">
+              <button
+                className="nav-link flex items-center"
+                onClick={(e) => {
+                  e.preventDefault()
+                  toggleClubsDropdown()
+                }}
+                onBlur={() => setTimeout(() => setIsClubsDropdownOpen(false), 100)}
+              >
+                Student Clubs <ChevronDown size={16} className="ml-1" />
+              </button>
+              {isClubsDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 w-40 bg-white rounded-md shadow-lg py-1 z-20">
+                  {studentClubs.map((club) => (
+                    <a
+                      key={club.name}
+                      href={club.url}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {club.name}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
             <NavLink to="/contact" className={`nav-link ${isActive("/contact") ? "nav-link-active" : ""}`}>
               Contact
             </NavLink>
@@ -138,6 +190,35 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
               >
                 Gallery
               </NavLink>
+
+              {/* Mobile Student Clubs Dropdown */}
+              <div>
+                <button className="nav-link w-full flex items-center justify-between" onClick={toggleMobileClubs}>
+                  Student Clubs
+                  {isMobileClubsOpen ? (
+                    <ChevronDown size={16} className="transition-transform duration-200" />
+                  ) : (
+                    <ChevronRight size={16} className="transition-transform duration-200" />
+                  )}
+                </button>
+                {isMobileClubsOpen && (
+                  <div className="mt-1 ml-4 space-y-1 animate-fade-in">
+                    {studentClubs.map((club) => (
+                      <a
+                        key={club.name}
+                        href={club.url}
+                        className="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded transition-colors duration-200"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={closeMenu}
+                      >
+                        {club.name}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <NavLink
                 to="/contact"
                 className={`nav-link ${isActive("/contact") ? "nav-link-active" : ""}`}

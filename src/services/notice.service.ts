@@ -2,21 +2,18 @@ import { apiClient } from "../lib/api"
 
 export interface NoticeRequest {
     title: string
-    content: string
     category: "academic" | "event" | "general" | "important"
     author: string
     pinned?: boolean
-    attachments?: string[]
 }
 
 export interface NoticeResponse {
     _id: string
     title: string
-    content: string
     category: "academic" | "event" | "general" | "important"
     author: string
+    attachments?: string | null
     pinned?: boolean
-    attachments?: string[]
     createdAt: string
     updatedAt: string
 }
@@ -64,6 +61,42 @@ export class NoticeService {
         } catch (error) {
             console.error("Failed to create notice:", error)
             throw new Error(error instanceof Error ? error.message : "Failed to create notice")
+        }
+    }
+
+    async uploadNoticePdf(noticeId: string, pdfFile: File): Promise<SingleNoticeResponse> {
+        try {
+            console.log(`Uploading PDF for notice ${noticeId}:`, pdfFile.name)
+
+            const formData = new FormData()
+            formData.append("notice", pdfFile)
+
+            // Get the base URL from environment variable
+            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+            const url = `${baseURL}/api/v1/notices/notice_pdf/${noticeId}`
+
+            console.log("Making PDF upload request to:", url)
+
+            const response = await fetch(url, {
+                method: "PATCH",
+                body: formData,
+                credentials: "include", // Important for cookies/auth
+            })
+
+            console.log("PDF upload response status:", response.status)
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                console.error("PDF upload error response:", errorData)
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+            }
+
+            const data = await response.json()
+            console.log("PDF uploaded successfully:", data)
+            return data
+        } catch (error) {
+            console.error(`Failed to upload PDF for notice ${noticeId}:`, error)
+            throw new Error(error instanceof Error ? error.message : "Failed to upload PDF")
         }
     }
 
