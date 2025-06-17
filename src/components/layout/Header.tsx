@@ -92,26 +92,37 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
             <NavLink to="/gallery" className={`nav-link ${isActive("/gallery") ? "nav-link-active" : ""}`}>
               Gallery
             </NavLink>
-            <div className="relative">
+            <div
+              className="relative"
+              onMouseEnter={() => setIsClubsDropdownOpen(true)}
+              onMouseLeave={() => setIsClubsDropdownOpen(false)}
+            >
               <button
                 className="nav-link flex items-center"
                 onClick={(e) => {
                   e.preventDefault()
-                  toggleClubsDropdown()
+                  setIsClubsDropdownOpen(!isClubsDropdownOpen)
                 }}
-                onBlur={() => setTimeout(() => setIsClubsDropdownOpen(false), 100)}
               >
                 Student Clubs <ChevronDown size={16} className="ml-1" />
               </button>
               {isClubsDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1 w-40 bg-white rounded-md shadow-lg py-1 z-20">
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-20 border">
                   {studentClubs.map((club) => (
                     <a
                       key={club.name}
                       href={club.url}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => {
+                        // Ensure the link opens
+                        e.stopPropagation()
+                        // Small delay to ensure the click is processed
+                        setTimeout(() => {
+                          setIsClubsDropdownOpen(false)
+                        }, 100)
+                      }}
                     >
                       {club.name}
                     </a>
@@ -210,7 +221,13 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
                         className="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded transition-colors duration-200"
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={closeMenu}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          // Close mobile menu after a short delay
+                          setTimeout(() => {
+                            closeMenu()
+                          }, 150)
+                        }}
                       >
                         {club.name}
                       </a>
