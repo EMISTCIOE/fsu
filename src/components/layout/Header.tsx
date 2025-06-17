@@ -44,13 +44,13 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
   }
 
   const studentClubs = [
-    { name: "AMESIN", url: "#" },
-    { name: "ASIS", url: "#" },
-    { name: "CESS", url: "#" },
-    { name: "ECAST", url: "#" },
-    { name: "RAC", url: "#" },
-    { name: "SOIES", url: "#" },
-    { name: "TENSOR", url: "#" },
+    { name: "AMESIN", url: "https://tcioe.edu.np/campuslife/student_club/AMESIN" },
+    { name: "ASIS", url: "https://tcioe.edu.np/campuslife/student_club/ASIS" },
+    { name: "CESS", url: "https://tcioe.edu.np/campuslife/student_club/CESS" },
+    { name: "ECAST", url: "https://ecast.tcioe.edu.np/" },
+    { name: "RAC", url: "https://rac.tcioe.edu.np/" },
+    { name: "SOIES", url: "https://tcioe.edu.np/campuslife/student_club/SOIES" },
+    { name: "TENSOR", url: "https://tensor.tcioe.edu.np/" },
   ]
 
   const isActive = (path: string) => {
