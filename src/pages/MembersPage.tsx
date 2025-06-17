@@ -152,7 +152,7 @@ const members: Member[] = [
         name: "Lalit Dani",
         position: "General Member",
        
-        image: "/members/lalit.jpg",
+        image: "/members/Lalit.jpg",
        
     },
     {
