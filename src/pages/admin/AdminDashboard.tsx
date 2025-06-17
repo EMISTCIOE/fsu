@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { Link } from "react-router-dom"
-import { Bell, MessageSquare, Users, Calendar, Settings, ExternalLink } from "lucide-react"
+import { Bell, MessageSquare, Calendar, Settings, ExternalLink } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
 import { useNotices } from "../../hooks/useNotices"
 import { useSuggestions } from "../../hooks/useSuggestions"
@@ -18,7 +18,6 @@ const AdminDashboard: React.FC = () => {
     totalSuggestions: suggestions.length,
     pendingSuggestions: suggestions.filter((s) => s.status === "pending").length,
     recentEvents: 3,
-    activeUsers: 278,
   }
 
   return (
@@ -29,8 +28,8 @@ const AdminDashboard: React.FC = () => {
           <p className="text-gray-600">Welcome back, {user?.username}! Here's an overview of your FSU portal.</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {/* Stats Cards - Now 3 cards in a row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           <div className="card p-6 hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center">
               <div className="bg-primary/10 p-4 rounded-full mr-4">
@@ -69,24 +68,12 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           </div>
-
-          <div className="card p-6 hover:shadow-md transition-shadow duration-300">
-            <div className="flex items-center">
-              <div className="bg-purple-100 p-4 rounded-full mr-4">
-                <Users size={24} className="text-purple-600" />
-              </div>
-              <div>
-                <p className="text-gray-600 text-sm">Active Students</p>
-                <h3 className="text-2xl font-bold">{stats.activeUsers}</h3>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Quick Actions */}
           <div className="lg:col-span-1">
-            <div className="card p-6 mb-8">
+            <div className="card p-6">
               <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 <Link
@@ -113,43 +100,9 @@ const AdminDashboard: React.FC = () => {
                 </button>
               </div>
             </div>
-
-            {/* System Stats */}
-            <div className="card p-6">
-              <h2 className="text-xl font-semibold mb-4">System Stats</h2>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm text-gray-600">Storage</span>
-                    <span className="text-sm text-gray-600">25%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: "25%" }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm text-gray-600">Bandwidth</span>
-                    <span className="text-sm text-gray-600">40%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: "40%" }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm text-gray-600">Memory</span>
-                    <span className="text-sm text-gray-600">60%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: "60%" }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             {/* Recent Notices */}
             <div className="card p-6 mb-8">
               <div className="flex justify-between items-center mb-4">
@@ -180,7 +133,7 @@ const AdminDashboard: React.FC = () => {
                         {notice.category}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 truncate">{notice.content}</p>
+                    <p className="text-sm text-gray-600 truncate">{notice.title}</p>
                     <div className="flex justify-between mt-2">
                       <span className="text-xs text-gray-500">{notice.date}</span>
                       <button className="text-primary text-xs hover:underline">Edit</button>

@@ -109,8 +109,8 @@ const HomePage: React.FC = () => {
       <section className="py-16 bg-gray-50">
         <div className="container-custom">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="section-title mb-0">Upcoming Events</h2>
-            <Link to="/notices" className="text-primary font-medium hover:underline inline-flex items-center">
+            <h2 className="section-title mb-0">FSU Events</h2>
+            <Link to="/gallery" className="text-primary font-medium hover:underline inline-flex items-center">
               View All <ArrowRight size={16} className="ml-1" />
             </Link>
           </div>

@@ -82,7 +82,7 @@ const AboutPage: React.FC = () => {
       </section>
       
       {/* History Section */}
-      <section className="py-16 bg-gray-50">
+      {/* <section className="py-16 bg-gray-50">
         <div className="container-custom">
           <h2 className="section-title text-center mb-12">Our History</h2>
           <div className="max-w-4xl mx-auto">
@@ -116,7 +116,7 @@ const AboutPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
       
       
     </div>

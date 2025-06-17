@@ -86,9 +86,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
             <NavLink to="/members" className={`nav-link ${isActive("/members") ? "nav-link-active" : ""}`}>
               Members
             </NavLink>
-            <NavLink to="/about" className={`nav-link ${isActive("/about") ? "nav-link-active" : ""}`}>
-              About
-            </NavLink>
+
             <NavLink to="/gallery" className={`nav-link ${isActive("/gallery") ? "nav-link-active" : ""}`}>
               Gallery
             </NavLink>
@@ -130,6 +128,9 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
                 </div>
               )}
             </div>
+            <NavLink to="/about" className={`nav-link ${isActive("/about") ? "nav-link-active" : ""}`}>
+              About
+            </NavLink>
             <NavLink to="/contact" className={`nav-link ${isActive("/contact") ? "nav-link-active" : ""}`}>
               Contact
             </NavLink>
