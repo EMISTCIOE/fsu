@@ -1,60 +1,96 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Download, Calendar, PinIcon, ExternalLink, FileText, AlertCircle } from "lucide-react"
+import {
+    ArrowLeft,
+    Download,
+    Calendar,
+    PinIcon,
+    ExternalLink,
+    ChevronLeft,
+    ChevronRight,
+    ZoomIn,
+    ZoomOut,
+    RotateCw,
+} from "lucide-react"
+import { Document, Page, pdfjs } from "react-pdf"
 import { useNotices } from "../hooks/useNotices"
 import NoticeCard from "../components/notices/NoticeCard"
 import { format, parseISO } from "date-fns"
+
+// Set up PDF.js worker using CDN (most reliable approach)
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+
+// Import CSS for react-pdf
+import "react-pdf/dist/esm/Page/AnnotationLayer.css"
+import "react-pdf/dist/esm/Page/TextLayer.css"
 
 const NoticeDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const { notices, getNoticeById } = useNotices()
-    const [isMobile, setIsMobile] = useState(false)
-    const [pdfLoadError, setPdfLoadError] = useState(false)
-    const [showMobileFallback, setShowMobileFallback] = useState(false)
+
+    // PDF viewing state
+    const [numPages, setNumPages] = useState<number>(0)
+    const [pageNumber, setPageNumber] = useState<number>(1)
+    const [scale, setScale] = useState<number>(1.0)
+    const [rotation, setRotation] = useState<number>(0)
+    const [loading, setLoading] = useState<boolean>(true)
+    const [error, setError] = useState<string | null>(null)
 
     const notice = id ? getNoticeById(id) : null
 
-    // More accurate mobile detection
-    useEffect(() => {
-        const checkMobile = () => {
-            const userAgent = navigator.userAgent.toLowerCase()
-            const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent)
-            const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0
-            const isSmallScreen = window.innerWidth <= 768
-
-            const actuallyMobile = isMobileDevice || (isTouchDevice && isSmallScreen)
-            setIsMobile(actuallyMobile)
-
-            // On actual mobile devices, show fallback immediately for better UX
-            if (actuallyMobile) {
-                setShowMobileFallback(true)
-            }
-        }
-
-        checkMobile()
-        window.addEventListener("resize", checkMobile)
-        return () => window.removeEventListener("resize", checkMobile)
+    const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
+        setNumPages(numPages)
+        setPageNumber(1)
+        setLoading(false)
+        setError(null)
+        console.log("PDF loaded successfully with", numPages, "pages")
     }, [])
 
-    if (!notice) {
-        return (
-            <div className="py-12">
-                <div className="container-custom">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-4">Notice Not Found</h1>
-                        <p className="text-gray-600 mb-6">The notice you're looking for doesn't exist or has been removed.</p>
-                        <button onClick={() => navigate("/notices")} className="btn btn-primary">
-                            Back to Notices
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )
+    const onDocumentLoadError = useCallback((error: Error) => {
+        console.error("PDF load error:", error)
+        setError("Failed to load PDF. Please try downloading it instead.")
+        setLoading(false)
+    }, [])
+
+    const onPageLoadError = useCallback((error: Error) => {
+        console.error("Page load error:", error)
+        setError("Failed to load this page of the PDF.")
+    }, [])
+
+    const handleDownload = () => {
+        if (notice?.attachments) {
+            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+            const fullPdfUrl = `${baseURL}${notice.attachments}`
+
+            const link = document.createElement("a")
+            link.href = fullPdfUrl
+            link.download = `${notice.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`
+            link.target = "_blank"
+            link.rel = "noopener noreferrer"
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+        }
     }
+
+    const handleOpenInNewTab = () => {
+        if (notice?.attachments) {
+            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+            const fullPdfUrl = `${baseURL}${notice.attachments}`
+            window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
+        }
+    }
+
+    // Navigation functions
+    const goToPrevPage = () => setPageNumber((prev) => Math.max(prev - 1, 1))
+    const goToNextPage = () => setPageNumber((prev) => Math.min(prev + 1, numPages))
+    const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 3.0))
+    const zoomOut = () => setScale((prev) => Math.max(prev - 0.2, 0.5))
+    const rotate = () => setRotation((prev) => (prev + 90) % 360)
 
     const getCategoryBadge = (category: string) => {
         switch (category) {
@@ -71,62 +107,20 @@ const NoticeDetailPage: React.FC = () => {
         }
     }
 
-    const handleDownload = () => {
-        if (notice.attachments) {
-            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
-            const fullPdfUrl = `${baseURL}${notice.attachments}`
-
-            const link = document.createElement("a")
-            link.href = fullPdfUrl
-            link.download = `${notice.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`
-            link.target = "_blank"
-            link.rel = "noopener noreferrer"
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-        }
-    }
-
-    const handleOpenInNewTab = () => {
-        if (notice.attachments) {
-            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
-            const fullPdfUrl = `${baseURL}${notice.attachments}`
-
-            // For mobile devices, use a more direct approach
-            if (isMobile) {
-                // Try to open in the device's default PDF viewer
-                window.location.href = fullPdfUrl
-            } else {
-                window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
-            }
-        }
-    }
-
-    const handleViewPDF = () => {
-        if (notice.attachments) {
-            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
-            const fullPdfUrl = `${baseURL}${notice.attachments}`
-
-            // For mobile, try different approaches
-            if (isMobile) {
-                // First try to open in a new window/tab
-                const newWindow = window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
-
-                // If popup was blocked or failed, fallback to direct navigation
-                if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
-                    setTimeout(() => {
-                        window.location.href = fullPdfUrl
-                    }, 100)
-                }
-            } else {
-                window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
-            }
-        }
-    }
-
-    const handleIframeError = () => {
-        setPdfLoadError(true)
-        setShowMobileFallback(true)
+    if (!notice) {
+        return (
+            <div className="py-12">
+                <div className="container-custom">
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold text-gray-900 mb-4">Notice Not Found</h1>
+                        <p className="text-gray-600 mb-6">The notice you're looking for doesn't exist or has been removed.</p>
+                        <button onClick={() => navigate("/notices")} className="btn btn-primary">
+                            Back to Notices
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     const formattedDate = format(parseISO(notice.date), "MMMM dd, yyyy")
@@ -172,9 +166,9 @@ const NoticeDetailPage: React.FC = () => {
                             <div className="flex flex-col sm:flex-row gap-2 mt-4 lg:mt-0">
                                 {pdfUrl && (
                                     <>
-                                        <button onClick={handleViewPDF} className="btn btn-secondary inline-flex items-center">
+                                        <button onClick={handleOpenInNewTab} className="btn btn-secondary inline-flex items-center">
                                             <ExternalLink size={16} className="mr-2" />
-                                            {isMobile ? "Open PDF" : "Open in New Tab"}
+                                            Open in New Tab
                                         </button>
                                         <button onClick={handleDownload} className="btn btn-primary inline-flex items-center">
                                             <Download size={16} className="mr-2" />
@@ -192,113 +186,127 @@ const NoticeDetailPage: React.FC = () => {
                     {/* PDF Viewer Column (3/4 width) */}
                     <div className="lg:col-span-3">
                         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                            <div className="bg-gray-50 px-4 py-3 border-b">
-                                <h2 className="font-semibold text-gray-900">Notice Document</h2>
-                                {isMobile && (
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        For best viewing experience, use the "Open PDF" button above
-                                    </p>
-                                )}
-                            </div>
+                            {/* PDF Controls */}
+                            {pdfUrl && !error && (
+                                <div className="bg-gray-50 px-4 py-3 border-b flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex items-center space-x-2">
+                                        <h2 className="font-semibold text-gray-900">Notice Document</h2>
+                                        {numPages > 0 && (
+                                            <span className="text-sm text-gray-600">
+                                                Page {pageNumber} of {numPages}
+                                            </span>
+                                        )}
+                                    </div>
 
+                                    <div className="flex items-center space-x-1">
+                                        {/* Navigation Controls */}
+                                        <button
+                                            onClick={goToPrevPage}
+                                            disabled={pageNumber <= 1}
+                                            className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title="Previous page"
+                                        >
+                                            <ChevronLeft size={16} />
+                                        </button>
+
+                                        <button
+                                            onClick={goToNextPage}
+                                            disabled={pageNumber >= numPages}
+                                            className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title="Next page"
+                                        >
+                                            <ChevronRight size={16} />
+                                        </button>
+
+                                        <div className="w-px h-6 bg-gray-300 mx-2" />
+
+                                        {/* Zoom Controls */}
+                                        <button
+                                            onClick={zoomOut}
+                                            disabled={scale <= 0.5}
+                                            className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title="Zoom out"
+                                        >
+                                            <ZoomOut size={16} />
+                                        </button>
+
+                                        <span className="text-sm text-gray-600 min-w-[3rem] text-center">{Math.round(scale * 100)}%</span>
+
+                                        <button
+                                            onClick={zoomIn}
+                                            disabled={scale >= 3.0}
+                                            className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title="Zoom in"
+                                        >
+                                            <ZoomIn size={16} />
+                                        </button>
+
+                                        <div className="w-px h-6 bg-gray-300 mx-2" />
+
+                                        {/* Rotate Control */}
+                                        <button onClick={rotate} className="p-2 text-gray-600 hover:text-gray-900" title="Rotate">
+                                            <RotateCw size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* PDF Content */}
                             {pdfUrl ? (
                                 <div className="relative">
-                                    {/* Show mobile-friendly interface immediately on mobile */}
-                                    {isMobile || showMobileFallback || pdfLoadError ? (
-                                        <div className="w-full h-[400px] md:h-[800px] bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center p-8">
-                                            <div className="text-center max-w-md">
-                                                <div className="bg-primary/10 p-4 rounded-full inline-flex items-center justify-center mb-6">
-                                                    <FileText size={32} className="text-primary" />
+                                    {loading && (
+                                        <div className="flex items-center justify-center h-96 bg-gray-50">
+                                            <div className="text-center">
+                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                                                <p className="text-gray-600">Loading PDF...</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {error ? (
+                                        <div className="flex items-center justify-center h-96 bg-gray-50">
+                                            <div className="text-center max-w-md px-4">
+                                                <div className="bg-red-100 p-4 rounded-full inline-flex items-center justify-center mb-4">
+                                                    <ExternalLink size={24} className="text-red-600" />
                                                 </div>
-
-                                                <h3 className="text-xl font-semibold text-gray-900 mb-3">{notice.title}</h3>
-
-                                                {isMobile ? (
-                                                    <p className="text-gray-600 mb-6">
-                                                        This PDF is best viewed in your device's built-in PDF viewer for optimal performance and
-                                                        features.
-                                                    </p>
-                                                ) : pdfLoadError ? (
-                                                    <div className="flex items-center justify-center text-amber-600 mb-6">
-                                                        <AlertCircle size={20} className="mr-2" />
-                                                        <p>PDF viewer failed to load. Please use the options below.</p>
-                                                    </div>
-                                                ) : (
-                                                    <p className="text-gray-600 mb-6">Click below to view or download the PDF document.</p>
-                                                )}
-
-                                                <div className="flex flex-col gap-3">
-                                                    <button
-                                                        onClick={handleViewPDF}
-                                                        className="btn btn-primary inline-flex items-center justify-center w-full"
-                                                    >
-                                                        <ExternalLink size={18} className="mr-2" />
-                                                        View PDF in Browser
+                                                <h3 className="text-lg font-medium text-gray-900 mb-2">PDF Viewer Error</h3>
+                                                <p className="text-gray-600 mb-4">{error}</p>
+                                                <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                                                    <button onClick={handleOpenInNewTab} className="btn btn-secondary inline-flex items-center">
+                                                        <ExternalLink size={16} className="mr-2" />
+                                                        Open in Browser
                                                     </button>
-
-                                                    <button
-                                                        onClick={handleDownload}
-                                                        className="btn btn-secondary inline-flex items-center justify-center w-full"
-                                                    >
-                                                        <Download size={18} className="mr-2" />
+                                                    <button onClick={handleDownload} className="btn btn-primary inline-flex items-center">
+                                                        <Download size={16} className="mr-2" />
                                                         Download PDF
                                                     </button>
-
-                                                    {!isMobile && (
-                                                        <button
-                                                            onClick={() => {
-                                                                setShowMobileFallback(false)
-                                                                setPdfLoadError(false)
-                                                            }}
-                                                            className="text-primary text-sm hover:underline mt-2"
-                                                        >
-                                                            Try loading PDF viewer again
-                                                        </button>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                     ) : (
-                                        // Desktop PDF viewer
-                                        <div className="w-full h-[800px] bg-gray-50">
-                                            <iframe
-                                                src={`${pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
-                                                className="w-full h-full border-0"
-                                                title={`PDF: ${notice.title}`}
-                                                loading="lazy"
-                                                allowFullScreen
-                                                onError={handleIframeError}
-                                                onLoad={(e) => {
-                                                    // Check if iframe actually loaded content
-                                                    const iframe = e.target as HTMLIFrameElement
-                                                    try {
-                                                        // This will throw an error if PDF didn't load properly
-                                                        if (iframe.contentDocument?.body?.innerHTML === "") {
-                                                            handleIframeError()
-                                                        }
-                                                    } catch (error) {
-                                                        // Cross-origin restrictions mean PDF loaded successfully
-                                                        console.log("PDF loaded successfully")
-                                                    }
+                                        <div className="flex justify-center bg-gray-100 p-4 min-h-[600px]">
+                                            <Document
+                                                file={pdfUrl}
+                                                onLoadSuccess={onDocumentLoadSuccess}
+                                                onLoadError={onDocumentLoadError}
+                                                options={{
+                                                    verbosity: 0, // Reduce console warnings
+                                                    // Use CDN for cmaps and fonts
+                                                    cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                                                    cMapPacked: true,
+                                                    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
                                                 }}
-                                            />
-
-                                            {/* Desktop fallback overlay - only shown on hover */}
-                                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 opacity-0 hover:opacity-90 transition-opacity duration-300 pointer-events-none">
-                                                <div className="bg-white p-4 rounded-lg shadow-lg text-center pointer-events-auto">
-                                                    <p className="text-gray-600 mb-3">Having trouble viewing the PDF?</p>
-                                                    <div className="flex flex-col sm:flex-row gap-2">
-                                                        <button onClick={handleViewPDF} className="btn btn-secondary inline-flex items-center">
-                                                            <ExternalLink size={16} className="mr-2" />
-                                                            Open in Browser
-                                                        </button>
-                                                        <button onClick={handleDownload} className="btn btn-primary inline-flex items-center">
-                                                            <Download size={16} className="mr-2" />
-                                                            Download PDF
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            >
+                                                <Page
+                                                    pageNumber={pageNumber}
+                                                    scale={scale}
+                                                    rotate={rotation}
+                                                    onLoadError={onPageLoadError}
+                                                    renderTextLayer={true}
+                                                    renderAnnotationLayer={true}
+                                                    className="shadow-lg"
+                                                />
+                                            </Document>
                                         </div>
                                     )}
                                 </div>

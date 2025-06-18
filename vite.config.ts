@@ -11,4 +11,10 @@ export default defineConfig({
   define: {
     __API_URL__: JSON.stringify(process.env.VITE_API_URL || "http://localhost:5000"),
   },
+  publicDir: "public",
+  build: {
+    rollupOptions: {
+      external: [],
+    },
+  },
 })
