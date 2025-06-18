@@ -65,7 +65,13 @@ const NoticeDetailPage: React.FC = () => {
         if (notice.attachments) {
             const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
             const fullPdfUrl = `${baseURL}${notice.attachments}`
-            window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
+
+            // On mobile, some browsers handle this better with location change
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                window.location.href = fullPdfUrl
+            } else {
+                window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
+            }
         }
     }
 
@@ -138,15 +144,42 @@ const NoticeDetailPage: React.FC = () => {
 
                             {pdfUrl ? (
                                 <div className="relative">
-                                    <iframe
-                                        src={`${pdfUrl}#toolbar=1&navpanes=1&scrollbar=1`}
-                                        className="w-full h-[800px] border-0"
-                                        title={`PDF: ${notice.title}`}
-                                        loading="lazy"
-                                    />
+                                    <div className="w-full h-[800px] bg-gray-50 flex flex-col">
+                                        {/* PDF Viewer with improved mobile compatibility */}
+                                        <iframe
+                                            src={`${pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
+                                            className="w-full h-full border-0"
+                                            title={`PDF: ${notice.title}`}
+                                            loading="lazy"
+                                            allowFullScreen
+                                        />
 
-                                    {/* Fallback message for browsers that don't support iframe PDF viewing */}
-                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                        {/* Mobile-friendly fallback that appears when iframe fails */}
+                                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 opacity-0 hover:opacity-100 md:hidden transition-opacity duration-300">
+                                            <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-xs mx-auto">
+                                                <p className="text-gray-600 mb-4">For the best viewing experience on mobile devices:</p>
+                                                <div className="flex flex-col gap-3">
+                                                    <button
+                                                        onClick={handleOpenInNewTab}
+                                                        className="btn btn-primary inline-flex items-center justify-center"
+                                                    >
+                                                        <ExternalLink size={16} className="mr-2" />
+                                                        Open in Browser
+                                                    </button>
+                                                    <button
+                                                        onClick={handleDownload}
+                                                        className="btn btn-secondary inline-flex items-center justify-center"
+                                                    >
+                                                        <Download size={16} className="mr-2" />
+                                                        Download PDF
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Desktop fallback message - only shown on hover */}
+                                    <div className="absolute inset-0 hidden md:flex items-center justify-center bg-gray-100 opacity-0 hover:opacity-90 transition-opacity duration-300 pointer-events-none">
                                         <div className="bg-white p-4 rounded-lg shadow-lg text-center pointer-events-auto">
                                             <p className="text-gray-600 mb-3">If the PDF doesn't display properly, you can:</p>
                                             <div className="flex flex-col sm:flex-row gap-2">
