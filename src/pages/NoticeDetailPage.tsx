@@ -1,8 +1,9 @@
 "use client"
 
 import type React from "react"
+import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Download, Calendar, PinIcon, ExternalLink } from "lucide-react"
+import { ArrowLeft, Download, Calendar, PinIcon, ExternalLink, FileText, AlertCircle } from "lucide-react"
 import { useNotices } from "../hooks/useNotices"
 import NoticeCard from "../components/notices/NoticeCard"
 import { format, parseISO } from "date-fns"
@@ -11,8 +12,33 @@ const NoticeDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const { notices, getNoticeById } = useNotices()
+    const [isMobile, setIsMobile] = useState(false)
+    const [pdfLoadError, setPdfLoadError] = useState(false)
+    const [showMobileFallback, setShowMobileFallback] = useState(false)
 
     const notice = id ? getNoticeById(id) : null
+
+    // More accurate mobile detection
+    useEffect(() => {
+        const checkMobile = () => {
+            const userAgent = navigator.userAgent.toLowerCase()
+            const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent)
+            const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0
+            const isSmallScreen = window.innerWidth <= 768
+
+            const actuallyMobile = isMobileDevice || (isTouchDevice && isSmallScreen)
+            setIsMobile(actuallyMobile)
+
+            // On actual mobile devices, show fallback immediately for better UX
+            if (actuallyMobile) {
+                setShowMobileFallback(true)
+            }
+        }
+
+        checkMobile()
+        window.addEventListener("resize", checkMobile)
+        return () => window.removeEventListener("resize", checkMobile)
+    }, [])
 
     if (!notice) {
         return (
@@ -66,13 +92,41 @@ const NoticeDetailPage: React.FC = () => {
             const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
             const fullPdfUrl = `${baseURL}${notice.attachments}`
 
-            // On mobile, some browsers handle this better with location change
-            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            // For mobile devices, use a more direct approach
+            if (isMobile) {
+                // Try to open in the device's default PDF viewer
                 window.location.href = fullPdfUrl
             } else {
                 window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
             }
         }
+    }
+
+    const handleViewPDF = () => {
+        if (notice.attachments) {
+            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+            const fullPdfUrl = `${baseURL}${notice.attachments}`
+
+            // For mobile, try different approaches
+            if (isMobile) {
+                // First try to open in a new window/tab
+                const newWindow = window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
+
+                // If popup was blocked or failed, fallback to direct navigation
+                if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+                    setTimeout(() => {
+                        window.location.href = fullPdfUrl
+                    }, 100)
+                }
+            } else {
+                window.open(fullPdfUrl, "_blank", "noopener,noreferrer")
+            }
+        }
+    }
+
+    const handleIframeError = () => {
+        setPdfLoadError(true)
+        setShowMobileFallback(true)
     }
 
     const formattedDate = format(parseISO(notice.date), "MMMM dd, yyyy")
@@ -118,9 +172,9 @@ const NoticeDetailPage: React.FC = () => {
                             <div className="flex flex-col sm:flex-row gap-2 mt-4 lg:mt-0">
                                 {pdfUrl && (
                                     <>
-                                        <button onClick={handleOpenInNewTab} className="btn btn-secondary inline-flex items-center">
+                                        <button onClick={handleViewPDF} className="btn btn-secondary inline-flex items-center">
                                             <ExternalLink size={16} className="mr-2" />
-                                            Open in New Tab
+                                            {isMobile ? "Open PDF" : "Open in New Tab"}
                                         </button>
                                         <button onClick={handleDownload} className="btn btn-primary inline-flex items-center">
                                             <Download size={16} className="mr-2" />
@@ -140,60 +194,113 @@ const NoticeDetailPage: React.FC = () => {
                         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                             <div className="bg-gray-50 px-4 py-3 border-b">
                                 <h2 className="font-semibold text-gray-900">Notice Document</h2>
+                                {isMobile && (
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        For best viewing experience, use the "Open PDF" button above
+                                    </p>
+                                )}
                             </div>
 
                             {pdfUrl ? (
                                 <div className="relative">
-                                    <div className="w-full h-[800px] bg-gray-50 flex flex-col">
-                                        {/* PDF Viewer with improved mobile compatibility */}
-                                        <iframe
-                                            src={`${pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
-                                            className="w-full h-full border-0"
-                                            title={`PDF: ${notice.title}`}
-                                            loading="lazy"
-                                            allowFullScreen
-                                        />
+                                    {/* Show mobile-friendly interface immediately on mobile */}
+                                    {isMobile || showMobileFallback || pdfLoadError ? (
+                                        <div className="w-full h-[400px] md:h-[800px] bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center p-8">
+                                            <div className="text-center max-w-md">
+                                                <div className="bg-primary/10 p-4 rounded-full inline-flex items-center justify-center mb-6">
+                                                    <FileText size={32} className="text-primary" />
+                                                </div>
 
-                                        {/* Mobile-friendly fallback that appears when iframe fails */}
-                                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 opacity-0 hover:opacity-100 md:hidden transition-opacity duration-300">
-                                            <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-xs mx-auto">
-                                                <p className="text-gray-600 mb-4">For the best viewing experience on mobile devices:</p>
+                                                <h3 className="text-xl font-semibold text-gray-900 mb-3">{notice.title}</h3>
+
+                                                {isMobile ? (
+                                                    <p className="text-gray-600 mb-6">
+                                                        This PDF is best viewed in your device's built-in PDF viewer for optimal performance and
+                                                        features.
+                                                    </p>
+                                                ) : pdfLoadError ? (
+                                                    <div className="flex items-center justify-center text-amber-600 mb-6">
+                                                        <AlertCircle size={20} className="mr-2" />
+                                                        <p>PDF viewer failed to load. Please use the options below.</p>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-gray-600 mb-6">Click below to view or download the PDF document.</p>
+                                                )}
+
                                                 <div className="flex flex-col gap-3">
                                                     <button
-                                                        onClick={handleOpenInNewTab}
-                                                        className="btn btn-primary inline-flex items-center justify-center"
+                                                        onClick={handleViewPDF}
+                                                        className="btn btn-primary inline-flex items-center justify-center w-full"
                                                     >
-                                                        <ExternalLink size={16} className="mr-2" />
-                                                        Open in Browser
+                                                        <ExternalLink size={18} className="mr-2" />
+                                                        View PDF in Browser
                                                     </button>
+
                                                     <button
                                                         onClick={handleDownload}
-                                                        className="btn btn-secondary inline-flex items-center justify-center"
+                                                        className="btn btn-secondary inline-flex items-center justify-center w-full"
                                                     >
-                                                        <Download size={16} className="mr-2" />
+                                                        <Download size={18} className="mr-2" />
                                                         Download PDF
                                                     </button>
+
+                                                    {!isMobile && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setShowMobileFallback(false)
+                                                                setPdfLoadError(false)
+                                                            }}
+                                                            className="text-primary text-sm hover:underline mt-2"
+                                                        >
+                                                            Try loading PDF viewer again
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        // Desktop PDF viewer
+                                        <div className="w-full h-[800px] bg-gray-50">
+                                            <iframe
+                                                src={`${pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
+                                                className="w-full h-full border-0"
+                                                title={`PDF: ${notice.title}`}
+                                                loading="lazy"
+                                                allowFullScreen
+                                                onError={handleIframeError}
+                                                onLoad={(e) => {
+                                                    // Check if iframe actually loaded content
+                                                    const iframe = e.target as HTMLIFrameElement
+                                                    try {
+                                                        // This will throw an error if PDF didn't load properly
+                                                        if (iframe.contentDocument?.body?.innerHTML === "") {
+                                                            handleIframeError()
+                                                        }
+                                                    } catch (error) {
+                                                        // Cross-origin restrictions mean PDF loaded successfully
+                                                        console.log("PDF loaded successfully")
+                                                    }
+                                                }}
+                                            />
 
-                                    {/* Desktop fallback message - only shown on hover */}
-                                    <div className="absolute inset-0 hidden md:flex items-center justify-center bg-gray-100 opacity-0 hover:opacity-90 transition-opacity duration-300 pointer-events-none">
-                                        <div className="bg-white p-4 rounded-lg shadow-lg text-center pointer-events-auto">
-                                            <p className="text-gray-600 mb-3">If the PDF doesn't display properly, you can:</p>
-                                            <div className="flex flex-col sm:flex-row gap-2">
-                                                <button onClick={handleOpenInNewTab} className="btn btn-secondary inline-flex items-center">
-                                                    <ExternalLink size={16} className="mr-2" />
-                                                    View in Browser
-                                                </button>
-                                                <button onClick={handleDownload} className="btn btn-primary inline-flex items-center">
-                                                    <Download size={16} className="mr-2" />
-                                                    Download PDF
-                                                </button>
+                                            {/* Desktop fallback overlay - only shown on hover */}
+                                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 opacity-0 hover:opacity-90 transition-opacity duration-300 pointer-events-none">
+                                                <div className="bg-white p-4 rounded-lg shadow-lg text-center pointer-events-auto">
+                                                    <p className="text-gray-600 mb-3">Having trouble viewing the PDF?</p>
+                                                    <div className="flex flex-col sm:flex-row gap-2">
+                                                        <button onClick={handleViewPDF} className="btn btn-secondary inline-flex items-center">
+                                                            <ExternalLink size={16} className="mr-2" />
+                                                            Open in Browser
+                                                        </button>
+                                                        <button onClick={handleDownload} className="btn btn-primary inline-flex items-center">
+                                                            <Download size={16} className="mr-2" />
+                                                            Download PDF
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="p-8 text-center">
