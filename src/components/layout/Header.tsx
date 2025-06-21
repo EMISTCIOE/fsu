@@ -44,13 +44,13 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
   }
 
   const studentClubs = [
-    { name: "AMESIN", url: "https://tcioe.edu.np/campuslife/student_club/AMESIN" },
-    { name: "ASIS", url: "https://tcioe.edu.np/campuslife/student_club/ASIS" },
-    { name: "CESS", url: "https://tcioe.edu.np/campuslife/student_club/CESS" },
-    { name: "ECAST", url: "https://ecast.tcioe.edu.np/" },
-    { name: "RAC", url: "https://rac.tcioe.edu.np/" },
-    { name: "SOIES", url: "https://tcioe.edu.np/campuslife/student_club/SOIES" },
-    { name: "TENSOR", url: "https://tensor.tcioe.edu.np/" },
+    { name: "AMESIN", url: "#" },
+    { name: "ASIS", url: "#" },
+    { name: "CESS", url: "#" },
+    { name: "ECAST", url: "#" },
+    { name: "RAC", url: "#" },
+    { name: "SOIES", url: "#" },
+    { name: "TENSOR", url: "#" },
   ]
 
   const isActive = (path: string) => {
@@ -86,7 +86,9 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
             <NavLink to="/members" className={`nav-link ${isActive("/members") ? "nav-link-active" : ""}`}>
               Members
             </NavLink>
-
+            <NavLink to="/about" className={`nav-link ${isActive("/about") ? "nav-link-active" : ""}`}>
+              About
+            </NavLink>
             <NavLink to="/gallery" className={`nav-link ${isActive("/gallery") ? "nav-link-active" : ""}`}>
               Gallery
             </NavLink>
@@ -128,13 +130,10 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
                 </div>
               )}
             </div>
-            <NavLink to="/about" className={`nav-link ${isActive("/about") ? "nav-link-active" : ""}`}>
-              About
-            </NavLink>
             <NavLink to="/contact" className={`nav-link ${isActive("/contact") ? "nav-link-active" : ""}`}>
               Contact
             </NavLink>
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <div className="flex items-center space-x-2 ml-2">
                 <NavLink to="/admin/dashboard" className="btn btn-primary">
                   Admin Panel
@@ -143,10 +142,6 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
                   <LogOut size={16} />
                 </button>
               </div>
-            ) : (
-              <NavLink to="/admin/login" className="btn btn-primary ml-2">
-                Admin Login
-              </NavLink>
             )}
           </nav>
 
@@ -244,7 +239,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
               >
                 Contact
               </NavLink>
-              {isAuthenticated ? (
+              {isAuthenticated && (
                 <div className="flex flex-col space-y-2 pt-2">
                   <NavLink to="/admin/dashboard" className="btn btn-primary text-center" onClick={closeMenu}>
                     Admin Panel
@@ -254,10 +249,6 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
                     Logout
                   </button>
                 </div>
-              ) : (
-                <NavLink to="/admin/login" className="btn btn-primary mt-2 text-center" onClick={closeMenu}>
-                  Admin Login
-                </NavLink>
               )}
             </div>
           </nav>
