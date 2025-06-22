@@ -72,7 +72,7 @@ const AboutPage: React.FC = () => {
             </div>
             <div>
               <img 
-                src="https://images.pexels.com/photos/6147369/pexels-photo-6147369.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
+                src="/about.png" 
                 alt="Campus students" 
                 className="rounded-lg shadow-lg w-full h-auto"
               />
