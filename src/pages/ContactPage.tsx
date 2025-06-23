@@ -52,7 +52,6 @@ const ContactPage: React.FC = () => {
                   <div>
                     <h3 className="font-medium mb-1">Email</h3>
                     <p className="text-gray-600">fsu@tcioe.edu.np</p>
-                    <p className="text-gray-600">info.fsu@tcioe.edu.np</p>
                   </div>
                 </div>
 
