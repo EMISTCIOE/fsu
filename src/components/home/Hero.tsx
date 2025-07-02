@@ -19,7 +19,7 @@ const Hero: React.FC = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             Free Student Union
             <span className="block text-xl md:text-2xl font-medium text-gray-300 mt-2">
-            TU,IOE,Thapathali Engineering Campus
+            TU, IOE, Thapathali Engineering Campus
             </span>
           </h1>
           
