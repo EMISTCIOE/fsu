@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 text-white pt-12 pb-6">
       <div className="container-custom">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* About Section */}
           <div>
             <h3 className="text-xl font-bold mb-4">Free Student Union</h3>
@@ -99,7 +99,38 @@ const Footer: React.FC = () => {
               </li>
             </ul>
           </div>
+
+          {/* Developers */}
+          <div>
+            <h3 className="text-xl font-bold mb-4">Developers</h3>
+            <ul className="space-y-3">
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/anup-ghimire-4a4ba3294"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Anup Ghimire
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/sudin-barakoti-087441274/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Sudin Barakoti
+                </a>
+              </li>
+
+            </ul>
+          </div>
         </div>
+
+
+
 
         <div className="border-t border-gray-800 mt-8 pt-6">
           <p className="text-center text-gray-500 text-sm">
