@@ -5,5 +5,5 @@
   "port": 3005,
   "domain": "fsu.tcioe.edu.np",
   "build": "npm install && npm run build",
-  "start": "npm run start -- --host"
+  "start": "npm run start -- --host --port 3005"
 }
