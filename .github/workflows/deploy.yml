@@ -1,0 +1,20 @@
+name: Deploy TCIOE Website to VPS
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Build & Deploy to VPS
+    runs-on: self-hosted
+    env:
+      VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Unified VPS Deployer
+        run: |
+          cd /srv/deployer
+          node deploy.js $GITHUB_REPOSITORY
