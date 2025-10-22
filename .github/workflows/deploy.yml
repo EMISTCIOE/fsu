@@ -1,4 +1,4 @@
-name: Deploy TCIOE Website to VPS
+name: Deploy FSU Website to VPS
 on:
   push:
     branches: [main]
