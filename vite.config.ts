@@ -10,7 +10,7 @@ export default defineConfig({
   // Define environment variables for better IntelliSense
   define: {
     __API_URL__: JSON.stringify(
-      process.env.VITE_API_URL || "http://localhost:5000"
+      process.env.VITE_API_URL || "http://localhost:5001"
     ),
   },
   publicDir: "public",
