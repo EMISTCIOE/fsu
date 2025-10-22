@@ -2,7 +2,7 @@
   "name": "fsu",
   "type": "node",
   "path": "/srv/apps/fsu",
-  "port": 3003,
+  "port": 3005,
   "domain": "fsu.tcioe.edu.np",
   "build": "npm install && npm run build",
   "start": "npm run start -- --host"
