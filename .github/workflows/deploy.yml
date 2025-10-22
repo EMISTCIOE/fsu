@@ -1,7 +1,7 @@
 name: Deploy FSU Website to VPS
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 jobs:
   deploy:
