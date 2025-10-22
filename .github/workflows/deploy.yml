@@ -1,11 +1,11 @@
-name: Deploy FSU Website to VPS
+name: Deploy FSU Website
 on:
   push:
     branches: [main]
 
 jobs:
   deploy:
-    name: Build & Deploy to VPS
+    name: Build & Deploy
     runs-on: self-hosted
     env:
       VITE_API_URL: ${{ secrets.VITE_API_URL }}
